@@ -7,10 +7,11 @@ class Workspace(object):
     """
     creates the workspace
     """
-    def __init__(self, strings, use_graphical_user_interface=False, root_path=None, science_path=None, bias_path=None, dark_path=None, flat_path=None,
-                 workspace_path=None, workspace_science_path=None, workspace_bias_path=None,
-                 workspace_dark_path=None, workspace_flat_path=None, bias_bool=True, dark_bool=True, flat_bool=True):
+    def __init__(self, strings, use_graphical_user_interface=False):
         super(Workspace, self).__init__()
+
+        self.bias_exist = True
+        self.dark_exist = True
 
         if use_graphical_user_interface:
             pass
@@ -40,32 +41,41 @@ class Workspace(object):
 
             # Enter folder name of bias images an check if folder exist
             str_folder_bias_images = input(strings.TXT_ENTER_FOLDER_NAME_OF_BIAS_IMAGES)
-            str_folder_bias_images = self.check_if_path_exist(
-                root_path=str_root_path,
-                string=strings.TXT_FOLDER_NAME_OF_BIAS_IMAGES_NOT_FOUND,
-                folder_name=str_folder_bias_images
-            )
+            if len(str_folder_bias_images) == 0:
+                self.bias_exist = False
+            if self.bias_exist:
+                str_folder_bias_images = self.check_if_path_exist(
+                    root_path=str_root_path,
+                    string=strings.TXT_FOLDER_NAME_OF_BIAS_IMAGES_NOT_FOUND,
+                    folder_name=str_folder_bias_images
+                )
 
             # Enter folder name of dark images an check if folder exist
             str_folder_dark_images = input(strings.TXT_ENTER_FOLDER_NAME_OF_DARK_IMAGES)
-            str_folder_dark_images = self.check_if_path_exist(
-                root_path=str_root_path,
-                string=strings.TXT_FOLDER_NAME_OF_DARK_IMAGES_NOT_FOUND,
-                folder_name=str_folder_dark_images
-            )
+            if len(str_folder_dark_images) == 0:
+                self.dark_exist = False
+            if self.dark_exist:
+                str_folder_dark_images = self.check_if_path_exist(
+                    root_path=str_root_path,
+                    string=strings.TXT_FOLDER_NAME_OF_DARK_IMAGES_NOT_FOUND,
+                    folder_name=str_folder_dark_images
+                )
 
             # Enter folder name of flat images dependent of given filter type and check if folder exist
             lst_path_flat_images = []
             for filter_type in lst_filter_types:
                 str_folder_flat_images = input(strings.TXT_ENTER_FOLDER_NAME_OF_FLAT_IMAGES_WITH_FILTER %
                                                filter_type)
-                str_folder_flat_images = self.check_if_path_exist(
-                    root_path=str_root_path,
-                    string=strings.TXT_FOLDER_NAME_OF_FLAT_IMAGES_WITH_FILTER_NOT_FOUND,
-                    folder_name=str_folder_flat_images,
-                    filter_type=filter_type
-                )
-                lst_path_flat_images.append(str_folder_flat_images)
+                if len(str_folder_flat_images) == 0:
+                    lst_path_flat_images.append(None)
+                else:
+                    str_folder_flat_images = self.check_if_path_exist(
+                        root_path=str_root_path,
+                        string=strings.TXT_FOLDER_NAME_OF_FLAT_IMAGES_WITH_FILTER_NOT_FOUND,
+                        folder_name=str_folder_flat_images,
+                        filter_type=filter_type
+                    )
+                    lst_path_flat_images.append(str_folder_flat_images)
 
             self.dict_original_directory = {
                 "root path": str_root_path,
@@ -96,28 +106,31 @@ class Workspace(object):
 
     def move_original_data(self):
         self.create_folder(self.dict_original_directory["root path"], "original_data")
-        shutil.move(
-            os.path.join(
-                self.dict_original_directory["root path"],
-                self.dict_original_directory["folder of bias images"]
-            ),
-            os.path.join(
-                self.dict_original_directory["root path"],
-                "original_data",
-                self.dict_original_directory["folder of bias images"]
+        if self.bias_exist:
+            shutil.move(
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    self.dict_original_directory["folder of bias images"]
+                ),
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    "original_data",
+                    self.dict_original_directory["folder of bias images"]
+                )
             )
-        )
-        shutil.move(
-            os.path.join(
-                self.dict_original_directory["root path"],
-                self.dict_original_directory["folder of dark images"]
-            ),
-            os.path.join(
-                self.dict_original_directory["root path"],
-                "original_data",
-                self.dict_original_directory["folder of dark images"]
+
+        if self.dark_exist:
+            shutil.move(
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    self.dict_original_directory["folder of dark images"]
+                ),
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    "original_data",
+                    self.dict_original_directory["folder of dark images"]
+                )
             )
-        )
 
         for filter_type in self.dict_original_directory["filter types"]:
             shutil.move(
@@ -131,17 +144,19 @@ class Workspace(object):
                     self.dict_original_directory["folder of light images with filter type %s" % filter_type]
                 )
             )
-            shutil.move(
-                os.path.join(
-                    self.dict_original_directory["root path"],
-                    self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
-                ),
-                os.path.join(
-                    self.dict_original_directory["root path"],
-                    "original_data",
-                    self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
+
+            if self.dict_original_directory["folder of flat images with filter type %s" % filter_type]:
+                shutil.move(
+                    os.path.join(
+                        self.dict_original_directory["root path"],
+                        self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
+                    ),
+                    os.path.join(
+                        self.dict_original_directory["root path"],
+                        "original_data",
+                        self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
+                    )
                 )
-            )
 
         for folder in os.listdir(self.dict_original_directory["root path"]):
             if not os.listdir(os.path.join(self.dict_original_directory["root path"], folder)):
@@ -169,31 +184,34 @@ class Workspace(object):
 
     def create_working_directory(self):
         self.create_folder(self.dict_working_directory["root path"])
-        self.create_folder(self.dict_working_directory["root path"], "bias")
-        self.copy_data(
-            os.path.join(
-                self.dict_original_directory["root path"],
-                "original_data",
-                self.dict_original_directory["folder of bias images"]
-            ),
-            os.path.join(
-                self.dict_working_directory["root path"],
-                self.dict_working_directory["folder of bias images"]
-            )
-        )
 
-        self.create_folder(self.dict_working_directory["root path"], "dark")
-        self.copy_data(
-            os.path.join(
-                self.dict_original_directory["root path"],
-                "original_data",
-                self.dict_original_directory["folder of dark images"]
-            ),
-            os.path.join(
-                self.dict_working_directory["root path"],
-                self.dict_working_directory["folder of dark images"]
+        if self.bias_exist:
+            self.create_folder(self.dict_working_directory["root path"], "bias")
+            self.copy_data(
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    "original_data",
+                    self.dict_original_directory["folder of bias images"]
+                ),
+                os.path.join(
+                    self.dict_working_directory["root path"],
+                    self.dict_working_directory["folder of bias images"]
+                )
             )
-        )
+
+        if self.dark_exist:
+            self.create_folder(self.dict_working_directory["root path"], "dark")
+            self.copy_data(
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    "original_data",
+                    self.dict_original_directory["folder of dark images"]
+                ),
+                os.path.join(
+                    self.dict_working_directory["root path"],
+                    self.dict_working_directory["folder of dark images"]
+                )
+            )
 
         for filter_type in self.dict_working_directory["filter types"]:
             self.create_folder(
@@ -212,21 +230,22 @@ class Workspace(object):
                 )
             )
 
-            self.create_folder(
-                self.dict_working_directory["root path"],
-                self.dict_working_directory["folder of flat images with filter type %s" % filter_type]
-            )
-            self.copy_data(
-                os.path.join(
-                    self.dict_original_directory["root path"],
-                    "original_data",
-                    self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
-                ),
-                os.path.join(
+            if self.dict_working_directory["folder of flat images with filter type %s" % filter_type]:
+                self.create_folder(
                     self.dict_working_directory["root path"],
                     self.dict_working_directory["folder of flat images with filter type %s" % filter_type]
                 )
-            )
+                self.copy_data(
+                    os.path.join(
+                        self.dict_original_directory["root path"],
+                        "original_data",
+                        self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
+                    ),
+                    os.path.join(
+                        self.dict_working_directory["root path"],
+                        self.dict_working_directory["folder of flat images with filter type %s" % filter_type]
+                    )
+                )
 
     @staticmethod
     def check_if_path_exist(root_path, string, folder_name=None, filter_type=None):
@@ -267,28 +286,32 @@ class Workspace(object):
             return os.path.join(root_path)
 
     def undo_workspace(self):
-        shutil.move(
-            os.path.join(
-                self.dict_original_directory["root path"],
-                "original_data",
-                self.dict_original_directory["folder of dark images"]
-            ),
-            os.path.join(
-                self.dict_original_directory["root path"],
-                self.dict_original_directory["folder of dark images"]
+        if self.dark_exist:
+            shutil.move(
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    "original_data",
+                    self.dict_original_directory["folder of dark images"]
+                ),
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    self.dict_original_directory["folder of dark images"]
+                )
             )
-        )
-        shutil.move(
-            os.path.join(
-                self.dict_original_directory["root path"],
-                "original_data",
-                self.dict_original_directory["folder of bias images"]
-            ),
-            os.path.join(
-                self.dict_original_directory["root path"],
-                self.dict_original_directory["folder of bias images"]
+
+        if self.bias_exist:
+            shutil.move(
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    "original_data",
+                    self.dict_original_directory["folder of bias images"]
+                ),
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    self.dict_original_directory["folder of bias images"]
+                )
             )
-        )
+
         for filter_type in self.dict_original_directory["filter types"]:
             shutil.move(
                 os.path.join(
@@ -301,17 +324,18 @@ class Workspace(object):
                     self.dict_original_directory["folder of light images with filter type %s" % filter_type]
                 )
             )
-            shutil.move(
-                os.path.join(
-                    self.dict_original_directory["root path"],
-                    "original_data",
-                    self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
-                ),
-                os.path.join(
-                    self.dict_original_directory["root path"],
-                    self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
+            if self.dict_original_directory["folder of flat images with filter type %s" % filter_type]:
+                shutil.move(
+                    os.path.join(
+                        self.dict_original_directory["root path"],
+                        "original_data",
+                        self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
+                    ),
+                    os.path.join(
+                        self.dict_original_directory["root path"],
+                        self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
+                    )
                 )
-            )
         shutil.rmtree(os.path.join(self.dict_original_directory["root path"], "original_data"))
         shutil.rmtree(os.path.join(self.dict_working_directory["root path"]))
 
