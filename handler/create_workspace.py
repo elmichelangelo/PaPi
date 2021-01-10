@@ -1,4 +1,5 @@
 import os
+import shutil
 
 
 class Workspace(object):
@@ -65,18 +66,32 @@ class Workspace(object):
                 )
                 lst_path_flat_images.append(str_folder_flat_images)
 
-            self.dict_original_paths = {
+            self.dict_original_directory = {
                 "root path": str_root_path,
                 "folder of bias images": str_folder_bias_images,
-                "folder of dark images": str_folder_dark_images
+                "folder of dark images": str_folder_dark_images,
+                "filter types": lst_filter_types
             }
             for idx, filter_type in enumerate(lst_filter_types):
-                self.dict_original_paths["folder of light images with filter type %s" % filter_type] = \
+                self.dict_original_directory["folder of light images with filter type %s" % filter_type] = \
                     lst_path_light_images[idx]
-                self.dict_original_paths["folder of flat images with filter type %s" % filter_type] = \
+                self.dict_original_directory["folder of flat images with filter type %s" % filter_type] = \
                     lst_path_flat_images[idx]
 
-        self.create_folder(self.dict_original_paths["root path"], "original_data")
+            self.dict_working_directory = {
+                "root path": os.path.join(str_root_path, "working_directory"),
+                "folder of bias images": "bias",
+                "folder of dark images": "dark",
+                "filter types": lst_filter_types
+            }
+            for idx, filter_type in enumerate(lst_filter_types):
+                self.dict_working_directory["folder of light images with filter type %s" % filter_type] = \
+                    lst_path_light_images[idx]
+                self.dict_working_directory["folder of flat images with filter type %s" % filter_type] = \
+                    lst_path_flat_images[idx]
+
+        self.move_original_data()
+        # self.create_working_directory()
 
         """self.science_path = self.check_if_none(folder_path=science_path, folder_name='light')
         self.bias_path = self.check_if_none(folder_path=bias_path, folder_name='bias')
@@ -100,12 +115,73 @@ class Workspace(object):
         self.dark_bool = dark_bool
         self.flat_bool = flat_bool"""
 
+    def move_original_data(self):
+        self.create_folder(self.dict_original_directory["root path"], "original_data")
+        shutil.move(
+            os.path.join(
+                self.dict_original_directory["root path"],
+                self.dict_original_directory["folder of bias images"]
+            ),
+            os.path.join(
+                self.dict_original_directory["root path"],
+                "original_data",
+                self.dict_original_directory["folder of bias images"]
+            )
+        )
+        shutil.move(
+            os.path.join(
+                self.dict_original_directory["root path"],
+                self.dict_original_directory["folder of dark images"]
+            ),
+            os.path.join(
+                self.dict_original_directory["root path"],
+                "original_data",
+                self.dict_original_directory["folder of dark images"]
+            )
+        )
+
+        for filter_type in self.dict_original_directory["filter types"]:
+            shutil.move(
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    self.dict_original_directory["folder of light images with filter type %s" % filter_type]
+                ),
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    "original_data",
+                    self.dict_original_directory["folder of light images with filter type %s" % filter_type]
+                )
+            )
+            shutil.move(
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
+                ),
+                os.path.join(
+                    self.dict_original_directory["root path"],
+                    "original_data",
+                    self.dict_original_directory["folder of flat images with filter type %s" % filter_type]
+                )
+            )
+
+        for folder in os.listdir(self.dict_original_directory["root path"]):
+            if not os.listdir(os.path.join(self.dict_original_directory["root path"], folder)):
+                os.rmdir(os.path.join(self.dict_original_directory["root path"], folder))
+
     @staticmethod
     def create_folder(path, folder_name):
         try:
             os.makedirs(os.path.join(path, folder_name))
         except FileExistsError:
             print("The folder '%s' already exist. Pass" % folder_name)
+
+    @staticmethod
+    def create_working_directory(path):
+        try:
+            os.makedirs(os.path.join(path, "working_directory"))
+        except FileExistsError:
+            print("The folder '%s' already exist. Pass" % folder_name)
+
 
     @staticmethod
     def check_if_path_exist(root_path, string, folder_name=None, filter_type=None):
@@ -117,11 +193,20 @@ class Workspace(object):
         :param filter_type: name of the folder
         :return: return the folder
         """
+        fits_in_file = False
         if folder_name:
             if filter_type:
                 while not os.path.exists(os.path.join(root_path, folder_name)):
                     folder_name = input(string % (folder_name, root_path, filter_type))
-                return folder_name
+
+                for fits_image in os.listdir(os.path.join(root_path, folder_name)):
+                    if ".fits" in str(fits_image):
+                        print(fits_image)
+                        fits_in_file = True
+                if fits_in_file:
+                    return folder_name
+                else:
+                    raise Exception("No fits image in given folder '%s' found" % os.path.join(root_path, folder_name))
             else:
                 while not os.path.exists(os.path.join(root_path, folder_name)):
                     folder_name = input(string % (folder_name, root_path))

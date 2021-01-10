@@ -23,4 +23,4 @@ if __name__ == "__main__":
 
     papi_test = PaPiMain(lan_strings)
 
-    print(papi_test.workspace.dict_original_paths)
+    print(papi_test.workspace.dict_original_directory)
