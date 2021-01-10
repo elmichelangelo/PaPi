@@ -17,10 +17,10 @@ def set_language():
 
 
 if __name__ == "__main__":
-
     # lan_strings = set_language()
     import strings.eng_strings as lan_strings
 
     papi_test = PaPiMain(lan_strings)
-
-    print(papi_test.workspace.dict_original_directory)
+    next_step = input("Next step: ")
+    if next_step == "undo":
+        papi_test.workspace.undo_workspace()
