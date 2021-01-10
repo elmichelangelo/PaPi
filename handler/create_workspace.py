@@ -91,6 +91,7 @@ class Workspace(object):
 
             self.dict_working_directory = {
                 "root path": os.path.join(str_root_path, "working_directory"),
+                "path of save files": os.path.join(str_root_path, "working_directory\\save_files"),
                 "folder of bias images": "bias",
                 "folder of dark images": "dark",
                 "filter types": lst_filter_types
@@ -184,6 +185,7 @@ class Workspace(object):
 
     def create_working_directory(self):
         self.create_folder(self.dict_working_directory["root path"])
+        self.create_folder(self.dict_working_directory["root path"], "save_files")
 
         if self.bias_exist:
             self.create_folder(self.dict_working_directory["root path"], "bias")

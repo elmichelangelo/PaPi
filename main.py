@@ -1,3 +1,6 @@
+import json
+import pickle
+import os
 from handler.create_workspace import Workspace
 
 
@@ -24,3 +27,11 @@ if __name__ == "__main__":
     next_step = input("Next step: ")
     if next_step == "undo":
         papi_test.workspace.undo_workspace()
+    elif next_step == "save":
+        save_name = input("Save analysis as: ")
+        file_handler = open(
+            os.path.join(papi_test.workspace.dict_working_directory["path of save files"] + save_name + ".dat"),
+            'w'
+        )
+        pickle.dump(str(papi_test.workspace.dict_working_directory), file_handler)
+        pickle.dump(str(papi_test.workspace.dict_original_directory), file_handler)
