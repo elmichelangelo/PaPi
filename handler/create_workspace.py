@@ -10,68 +10,77 @@ class Workspace(object):
     def __init__(self, strings, use_graphical_user_interface=False):
         super(Workspace, self).__init__()
 
+        print("#######################################################################################################")
+        print("\t\t\t\t\t\t\t\t\t *** Welcome to PaPi *** ")
+        print("#######################################################################################################")
+
         self.bias_exist = True
         self.dark_exist = True
+        self.use_graphical_user_interface = use_graphical_user_interface
+        self.strings = strings
+        self.dict_original_directory = {}
+        self.dict_working_directory = {}
 
-        if use_graphical_user_interface:
+    def create_workspace(self):
+        if self.use_graphical_user_interface:
             pass
         else:
             # Enter root path and check if path exist
-            str_root_path = input(strings.TXT_ENTER_ROOT_PATH)
+            str_root_path = input(self.strings.TXT_ENTER_ROOT_PATH)
             str_root_path = self.check_if_path_exist(
                 root_path=str_root_path,
-                string=strings.TXT_ROOT_PATH_NOT_FOUND
+                string=self.strings.TXT_ROOT_PATH_NOT_FOUND
             )
 
             # Enter filter types
-            lst_filter_types = input(strings.TXT_FILTER_TYPES).split(",")
+            lst_filter_types = input(self.strings.TXT_FILTER_TYPES).split(",")
 
             # Enter folder name of light images dependent of given filter type and check if folder exist
             lst_path_light_images = []
             for filter_type in lst_filter_types:
-                str_folder_light_images = input(strings.TXT_ENTER_FOLDER_NAME_OF_LIGHT_IMAGES_WITH_FILTER %
+                str_folder_light_images = input(self.strings.TXT_ENTER_FOLDER_NAME_OF_LIGHT_IMAGES_WITH_FILTER %
                                                 filter_type)
                 str_folder_light_images = self.check_if_path_exist(
                     root_path=str_root_path,
-                    string=strings.TXT_FOLDER_NAME_OF_LIGHT_IMAGES_WITH_FILTER_NOT_FOUND,
+                    string=self.strings.TXT_FOLDER_NAME_OF_LIGHT_IMAGES_WITH_FILTER_NOT_FOUND,
                     folder_name=str_folder_light_images,
                     filter_type=filter_type
                 )
                 lst_path_light_images.append(str_folder_light_images)
 
             # Enter folder name of bias images an check if folder exist
-            str_folder_bias_images = input(strings.TXT_ENTER_FOLDER_NAME_OF_BIAS_IMAGES)
+            str_folder_bias_images = input(self.strings.TXT_ENTER_FOLDER_NAME_OF_BIAS_IMAGES)
             if len(str_folder_bias_images) == 0:
                 self.bias_exist = False
             if self.bias_exist:
                 str_folder_bias_images = self.check_if_path_exist(
                     root_path=str_root_path,
-                    string=strings.TXT_FOLDER_NAME_OF_BIAS_IMAGES_NOT_FOUND,
+                    string=self.strings.TXT_FOLDER_NAME_OF_BIAS_IMAGES_NOT_FOUND,
                     folder_name=str_folder_bias_images
                 )
 
             # Enter folder name of dark images an check if folder exist
-            str_folder_dark_images = input(strings.TXT_ENTER_FOLDER_NAME_OF_DARK_IMAGES)
+            str_folder_dark_images = input(self.strings.TXT_ENTER_FOLDER_NAME_OF_DARK_IMAGES)
             if len(str_folder_dark_images) == 0:
                 self.dark_exist = False
             if self.dark_exist:
                 str_folder_dark_images = self.check_if_path_exist(
                     root_path=str_root_path,
-                    string=strings.TXT_FOLDER_NAME_OF_DARK_IMAGES_NOT_FOUND,
+                    string=self.strings.TXT_FOLDER_NAME_OF_DARK_IMAGES_NOT_FOUND,
                     folder_name=str_folder_dark_images
                 )
 
             # Enter folder name of flat images dependent of given filter type and check if folder exist
             lst_path_flat_images = []
             for filter_type in lst_filter_types:
-                str_folder_flat_images = input(strings.TXT_ENTER_FOLDER_NAME_OF_FLAT_IMAGES_WITH_FILTER %
+                str_folder_flat_images = input(self.strings.TXT_ENTER_FOLDER_NAME_OF_FLAT_IMAGES_WITH_FILTER %
                                                filter_type)
                 if len(str_folder_flat_images) == 0:
                     lst_path_flat_images.append(None)
                 else:
                     str_folder_flat_images = self.check_if_path_exist(
                         root_path=str_root_path,
-                        string=strings.TXT_FOLDER_NAME_OF_FLAT_IMAGES_WITH_FILTER_NOT_FOUND,
+                        string=self.strings.TXT_FOLDER_NAME_OF_FLAT_IMAGES_WITH_FILTER_NOT_FOUND,
                         folder_name=str_folder_flat_images,
                         filter_type=filter_type
                     )
@@ -91,7 +100,6 @@ class Workspace(object):
 
             self.dict_working_directory = {
                 "root path": os.path.join(str_root_path, "working_directory"),
-                "path of save files": os.path.join(str_root_path, "working_directory\\save_files"),
                 "folder of bias images": "bias",
                 "folder of dark images": "dark",
                 "filter types": lst_filter_types

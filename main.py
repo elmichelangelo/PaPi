@@ -1,4 +1,4 @@
-import json
+import sys
 import pickle
 import os
 from handler.create_workspace import Workspace
@@ -7,6 +7,50 @@ from handler.create_workspace import Workspace
 class PaPiMain(object):
     def __init__(self, strings):
         self.workspace = Workspace(strings)
+
+    def run(self):
+        while True:
+            command = input("Enter cmd: ")
+            if command == "undo":
+                self.workspace.undo_workspace()
+            elif command == "save":
+                self.save_analysis()
+            elif command == "load":
+                self.load_analysis()
+            elif command == "new":
+                self.workspace.create_workspace()
+            elif command == "exit":
+                sys.exit()
+
+    def save_analysis(self):
+        save_name = input("Save analysis as: ")
+        self.workspace.dict_working_directory["path of save files"] = os.path.join(
+            self.workspace.dict_working_directory["root path"],
+            save_name
+        )
+        sf_working_directory = open(
+            os.path.join(self.workspace.dict_working_directory["path of save files"], "working_directory.dat"),
+            'wb'
+        )
+        pickle.dump(str(self.workspace.dict_working_directory), sf_working_directory)
+        sf_working_directory.close()
+        sf_origin_directory = open(
+            os.path.join(self.workspace.dict_working_directory["path of save files"], "origin_directory.dat"),
+            'wb'
+        )
+        pickle.dump(str(self.workspace.dict_original_directory), sf_origin_directory)
+        sf_origin_directory.close()
+
+
+    @staticmethod
+    def load_analysis():
+        save_name = input("Path of save file: ")
+        save_file = open(
+            os.path.join(save_name),
+            'rb'
+        )
+        loaded_file = pickle.load(save_file)
+        save_file.close()
 
 
 def set_language():
@@ -24,14 +68,4 @@ if __name__ == "__main__":
     import strings.eng_strings as lan_strings
 
     papi_test = PaPiMain(lan_strings)
-    next_step = input("Next step: ")
-    if next_step == "undo":
-        papi_test.workspace.undo_workspace()
-    elif next_step == "save":
-        save_name = input("Save analysis as: ")
-        file_handler = open(
-            os.path.join(papi_test.workspace.dict_working_directory["path of save files"] + save_name + ".dat"),
-            'w'
-        )
-        pickle.dump(str(papi_test.workspace.dict_working_directory), file_handler)
-        pickle.dump(str(papi_test.workspace.dict_original_directory), file_handler)
+    papi_test.run()
