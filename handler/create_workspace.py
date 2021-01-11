@@ -18,8 +18,14 @@ class Workspace(object):
         self.dark_exist = True
         self.use_graphical_user_interface = use_graphical_user_interface
         self.strings = strings
-        self.dict_original_directory = {}
-        self.dict_working_directory = {}
+
+        str_root_path = input(self.strings.TXT_ENTER_ROOT_PATH)
+        self.dict_original_directory = {
+            "root path": str_root_path
+        }
+        self.dict_working_directory = {
+            "root path": os.path.join(str_root_path, "working_directory"),
+        }
 
     def create_workspace(self):
         if self.use_graphical_user_interface:
@@ -87,7 +93,6 @@ class Workspace(object):
                     lst_path_flat_images.append(str_folder_flat_images)
 
             self.dict_original_directory = {
-                "root path": str_root_path,
                 "folder of bias images": str_folder_bias_images,
                 "folder of dark images": str_folder_dark_images,
                 "filter types": lst_filter_types
@@ -99,7 +104,6 @@ class Workspace(object):
                     lst_path_flat_images[idx]
 
             self.dict_working_directory = {
-                "root path": os.path.join(str_root_path, "working_directory"),
                 "folder of bias images": "bias",
                 "folder of dark images": "dark",
                 "filter types": lst_filter_types
@@ -193,7 +197,6 @@ class Workspace(object):
 
     def create_working_directory(self):
         self.create_folder(self.dict_working_directory["root path"])
-        self.create_folder(self.dict_working_directory["root path"], "save_files")
 
         if self.bias_exist:
             self.create_folder(self.dict_working_directory["root path"], "bias")

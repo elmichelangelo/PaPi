@@ -28,6 +28,7 @@ class PaPiMain(object):
             self.workspace.dict_working_directory["root path"],
             save_name
         )
+        self.workspace.create_folder(self.workspace.dict_working_directory["path of save files"])
         sf_working_directory = open(
             os.path.join(self.workspace.dict_working_directory["path of save files"], "working_directory.dat"),
             'wb'
@@ -41,16 +42,17 @@ class PaPiMain(object):
         pickle.dump(str(self.workspace.dict_original_directory), sf_origin_directory)
         sf_origin_directory.close()
 
-
-    @staticmethod
-    def load_analysis():
+    def load_analysis(self):
         save_name = input("Path of save file: ")
-        save_file = open(
-            os.path.join(save_name),
-            'rb'
-        )
-        loaded_file = pickle.load(save_file)
-        save_file.close()
+        save_directory = os.listdir(os.path.join(self.workspace.dict_working_directory["root path"], save_name))
+        # TODO hier weiter arbeiten
+        for save_file in save_directory:
+            save_file = open(
+                os.path.join(save_name),
+                'rb'
+            )
+            loaded_file = pickle.load(save_file)
+            save_file.close()
 
 
 def set_language():
